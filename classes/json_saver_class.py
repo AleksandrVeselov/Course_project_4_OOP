@@ -9,7 +9,8 @@ class JSONSaver:
         инициализатор класса
         :param keyword: имя для файла
         """
-        self.__filename = f'{keyword.title()}.json'
+        self.__filename = f'{keyword.title()}.json'  # имя файла
+        self.vacancies = None  # список экземпляров класса Vacancy
 
     @property
     def filename(self):
