@@ -25,12 +25,11 @@ def main():
 
     area = input('Регион поиска по умолчанию - Россия. Хотите сменить? (Да/Нет) -> ')
 
-    if area.lower() != 'да':
-        area = None
+    if area.lower() == 'да':
+        area = hh_api.get_region_id(area)  # поиск id региона
 
     else:
-        pass
-        # функция смены региона
+        area = None
 
     count = int(input('Введите количество вакансий для парсинга (кратное 50) -> '))
 

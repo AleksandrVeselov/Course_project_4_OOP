@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 import requests
 from pprint import pprint
@@ -6,6 +7,7 @@ from pprint import pprint
 class Engine(ABC):
     """Абстрактный класс-родитель для классов HH и SJ"""
 
+    @abstractmethod
     def get_request(self):
         pass
 
@@ -14,7 +16,28 @@ class HeadHunterAPI(Engine):
     """Класс для работы с API сайта headhunter.ru"""
     URL = 'https://api.hh.ru/vacancies'
 
-    def get_request(self, keyword, page, area, per_page=50):
+    @staticmethod
+    def get_region_id(region, town=None) -> str:
+        """
+        Получение ID региона по его названию
+        :param region: название региона
+        :param town: название название города
+        :return: id региона и id города
+        """
+        regions_response = requests.get('https://api.hh.ru/areas')
+        for r in regions_response.json()[0]['areas']:
+            if region.capitalize() in r['name']:
+
+                # если задан город
+                if town:
+                    for t in r['areas']:
+                        if region.capitalize() in t['name']:
+                            return f"id области {region} - {r['id']}; id города {town} - {t['id']}"
+                else:
+                    return f"id региона {region} - {r['id']}"
+        return 'Некорректный запрос'
+
+    def get_request(self, keyword, page, area, per_page=20):
         """
         Отправка запроса на API
         :param keyword: ключевое слово (название вакансии)
@@ -33,8 +56,6 @@ class HeadHunterAPI(Engine):
                   'area': area}
 
         response = requests.get(self.URL, params=params).json()
-        for p in response['items']:
-            pprint(p)
         return response['items']
 
     def get_vacancies(self, keyword: str, count: int, area=113) -> list[dict]:
@@ -45,19 +66,51 @@ class HeadHunterAPI(Engine):
         :param count: количество вакансий для парсинга
         :return: список с вакансиями на соответствующей странице
         """
-        if count <= 100:
-            pages = 1  # количество страниц с вакансиями
-            vacancies = self.get_request(keyword, pages, area)
+        pages = count // 20 + 1
+        vacancies = []
+        for page in range(pages):
+            page = self.get_request(keyword, page+1, area)
+            vacancies.extend(page)
+        return vacancies
 
-        else:
-            pages = count // 50 + 1
-            vacancies = []
-            for i in range(pages):
-                page = self.get_request(keyword, pages, area)
-                vacancies.extend(page)
+
+class SuperJobAPI(Engine):
+    """Класс для работы с сайтом superjob"""
+    SUPER_SECRET_KEY = 'v3.r.137470714.2f709c74e49a5c3452e4bc542e76452080aaa3cb' \
+                       '.c191c920c6f79710ba889d27e93e9bb87bdb1533 '
+    URL = 'https://api.superjob.ru/2.0/vacancies/'
+
+    def get_request(self, keyword, town, page, count=20) -> json:
+        """
+        Метод для отправки запроса на api superjob
+        :param keyword: ключевое слово (название профессии)
+        :param town: регион (город или область)
+        :param page: номер страницы
+        :param count: количество вакансий на странице
+        :return: список вакансий, соответствующих требованиям в формате json
+        """
+        params = {'keyword': keyword,
+                  'town': town,
+                  'sort_new (unixtime)': 1,
+                  'page': page,
+                  'count': count,
+                  'no_agreement': 1}
+
+        response = requests.get(self.URL, headers={'X-Api-App-Id': self.SUPER_SECRET_KEY},
+                                params=params).json()
+
+        return response['objects']
+
+    def get_vacancies(self, keyword, town, count=20):
+        pages = count // 20 + 1
+        vacancies = []
+        for page in range(pages):
+            response = self.get_request(keyword, town, page+1)
+            vacancies.extend(response)
+        print(vacancies)
         return vacancies
 
 
 if __name__ == '__main__':
-    hh = HeadHunterAPI()
-    hh.get_vacancies('Инженер-конструктор', 1716)  # 1716 - Владимирская область, 113 - Россия
+    sj = SuperJobAPI()
+    sj.get_vacancies('Инженер-конструктор', 'Владимир')  # 1716 - Владимирская область, 113 - Россия
