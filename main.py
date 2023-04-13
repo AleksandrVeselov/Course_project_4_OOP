@@ -8,38 +8,26 @@ def main():
 
     # Запрос платформ для поиска
     platforms = input('Введите платформы для поиска вакансий HH - Headhunter, SJ - SuperJob.'
-                      'Для поиска вакансий на двух платформах нажмите Enter ->')
+                      'Для поиска вакансий на двух платформах нажмите Enter -> ')
 
     if platforms.lower() == 'hh':
         hh_api = hh_sj_classes.HeadHunterAPI()
 
     elif platforms.lower() == 'sj':
-        # sj_api
-        pass
+        sj_api = hh_sj_classes.SuperJobAPI()
 
     else:
         hh_api = hh_sj_classes.HeadHunterAPI()
-        # sj_api
+        sj_api = hh_sj_classes.SuperJobAPI()
 
     keyword = input('Введите поисковый запрос -> ')
-
-    area = input('Регион поиска по умолчанию - Россия. Хотите сменить? (Да/Нет) -> ')
-
-    if area.lower() == 'да':
-        area = hh_api.get_region_id(area)  # поиск id региона
-
-    else:
-        area = None
-
     count = int(input('Введите количество вакансий для парсинга (кратное 50) -> '))
 
-    if area is not None:
-        hh_vacancies = hh_api.get_vacancies(keyword, count, area)
-    else:
-        hh_vacancies = hh_api.get_vacancies(keyword, count)
+    hh_vacancies = hh_api.get_vacancies(keyword, count)
 
     for vacancy in hh_vacancies:
         print(vacancy)
+        print()
 
 
 if __name__ == '__main__':

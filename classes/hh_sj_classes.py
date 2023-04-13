@@ -1,7 +1,7 @@
 import json
 from abc import ABC, abstractmethod
 import requests
-from pprint import pprint
+from classes.vacansy_class import Vacansy
 
 
 class Engine(ABC):
@@ -37,7 +37,7 @@ class HeadHunterAPI(Engine):
                     return f"id региона {region} - {r['id']}"
         return 'Некорректный запрос'
 
-    def get_request(self, keyword, page, area, per_page=100):
+    def get_request(self, keyword, page, area, per_page=10):
         """
         Отправка запроса на API
         :param keyword: ключевое слово (название вакансии)
@@ -62,7 +62,7 @@ class HeadHunterAPI(Engine):
         """
         Делает запросы, изменяя номер страницы
         :param keyword: ключевое слово (название вакансии)
-        :param area: ID региона из справочника  (по умолчанию 113 - Вся Россия) 1716 - Владимирская область, 1 - Москва
+        :param area: ID региона из справочника (по умолчанию 113 - Вся Россия) 1716 - Владимирская область, 1 - Москва
         2019 - Московская область, 2 - Санкт-Петербург
         :param count: количество вакансий для парсинга (минимальное значение - 100. Если задать меньше - вернется 100)
         :return: список с вакансиями на соответствующей странице
@@ -71,7 +71,17 @@ class HeadHunterAPI(Engine):
         vacancies = []
         for page in range(pages):
             page = self.get_request(keyword, page + 1, area)
-            vacancies.extend(page)
+            for vac in page:
+                vacancies.append(Vacansy(vac['name'],
+                                         vac['salary']['from'],
+                                         vac['salary']['to'],
+                                         vac['alternate_url'],
+                                         vac['salary']['currency'],
+                                         vac['area']['name'],
+                                         vac['snippet']['requirement'],
+                                         vac['snippet']['responsibility'],
+                                         vac['experience']['name']))
+            # vacancies.extend(page)
         return vacancies
 
 
