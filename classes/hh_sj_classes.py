@@ -8,7 +8,7 @@ class Engine(ABC):
     """Абстрактный класс-родитель для классов HH и SJ"""
 
     @abstractmethod
-    def get_request(self):
+    def get_request(self, *args, **qwargs):
         pass
 
 
@@ -37,7 +37,7 @@ class HeadHunterAPI(Engine):
                     return f"id региона {region} - {r['id']}"
         return 'Некорректный запрос'
 
-    def get_request(self, keyword, page, area, per_page=20):
+    def get_request(self, keyword, page, area, per_page=100):
         """
         Отправка запроса на API
         :param keyword: ключевое слово (название вакансии)
@@ -58,18 +58,19 @@ class HeadHunterAPI(Engine):
         response = requests.get(self.URL, params=params).json()
         return response['items']
 
-    def get_vacancies(self, keyword: str, count: int, area=113) -> list[dict]:
+    def get_vacancies(self, keyword: str, count=100, area=113) -> list[dict]:
         """
         Делает запросы, изменяя номер страницы
         :param keyword: ключевое слово (название вакансии)
-        :param area: ID региона из справочника
-        :param count: количество вакансий для парсинга
+        :param area: ID региона из справочника  (по умолчанию 113 - Вся Россия) 1716 - Владимирская область, 1 - Москва
+        2019 - Московская область, 2 - Санкт-Петербург
+        :param count: количество вакансий для парсинга (минимальное значение - 100. Если задать меньше - вернется 100)
         :return: список с вакансиями на соответствующей странице
         """
-        pages = count // 20 + 1
+        pages = count // 100 + 1  # расчет количества страниц
         vacancies = []
         for page in range(pages):
-            page = self.get_request(keyword, page+1, area)
+            page = self.get_request(keyword, page + 1, area)
             vacancies.extend(page)
         return vacancies
 
@@ -80,13 +81,13 @@ class SuperJobAPI(Engine):
                        '.c191c920c6f79710ba889d27e93e9bb87bdb1533 '
     URL = 'https://api.superjob.ru/2.0/vacancies/'
 
-    def get_request(self, keyword, town, page, count=20) -> json:
+    def get_request(self, keyword, town, page, count=100) -> json:
         """
         Метод для отправки запроса на api superjob
         :param keyword: ключевое слово (название профессии)
         :param town: регион (город или область)
         :param page: номер страницы
-        :param count: количество вакансий на странице
+        :param count: количество вакансий на странице (100 вакансий)
         :return: список вакансий, соответствующих требованиям в формате json
         """
         params = {'keyword': keyword,
@@ -101,11 +102,12 @@ class SuperJobAPI(Engine):
 
         return response['objects']
 
-    def get_vacancies(self, keyword, town, count=20):
-        pages = count // 20 + 1
+    def get_vacancies(self, keyword, town, pages=1):
+        if pages > 5:
+            raise ValueError('Превышено максимальное количество страниц с вакансиями (не более 5)')
         vacancies = []
         for page in range(pages):
-            response = self.get_request(keyword, town, page+1)
+            response = self.get_request(keyword, town, page + 1)
             vacancies.extend(response)
         print(vacancies)
         return vacancies
