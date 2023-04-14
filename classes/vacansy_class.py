@@ -19,3 +19,5 @@ class Vacansy:
                f'Описание вакансии: {self.responsibility}\n' \
                f'Требования к опыту: {self.experience}\n' \
                f'Ссылка на вакансию: {self.link}'
+
+

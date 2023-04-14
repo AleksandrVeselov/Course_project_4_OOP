@@ -1,4 +1,5 @@
 from classes import hh_sj_classes
+from classes.json_saver_class import JSONSaver
 
 
 def main():
@@ -24,8 +25,10 @@ def main():
     count = int(input('Введите количество вакансий для парсинга (кратное 50) -> '))
 
     hh_vacancies = hh_api.get_vacancies(keyword, count)
-
-    for vacancy in hh_vacancies:
+    json_saver = JSONSaver(keyword)
+    json_saver.add_vacancies(hh_vacancies)
+    f = json_saver.get_vacancies_by_salary('80000-90000')
+    for vacancy in f:
         print(vacancy)
         print()
 

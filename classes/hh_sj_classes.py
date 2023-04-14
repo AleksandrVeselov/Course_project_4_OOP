@@ -53,12 +53,14 @@ class HeadHunterAPI(Engine):
                   'per_page': per_page,
                   'only_with_salary': True,
                   'order_by': "publication_time",
-                  'area': area}
+                  'area': area,
+                  'currency': 'RUR'
+                  }
 
         response = requests.get(self.URL, params=params).json()
         return response['items']
 
-    def get_vacancies(self, keyword: str, count=100, area=113) -> list[dict]:
+    def get_vacancies(self, keyword: str, count=100, area=113) -> list[json]:
         """
         Делает запросы, изменяя номер страницы
         :param keyword: ключевое слово (название вакансии)
@@ -68,20 +70,10 @@ class HeadHunterAPI(Engine):
         :return: список с вакансиями на соответствующей странице
         """
         pages = count // 100 + 1  # расчет количества страниц
-        vacancies = []
+        vacancies = []  # список с вакансиями
         for page in range(pages):
             page = self.get_request(keyword, page + 1, area)
-            for vac in page:
-                vacancies.append(Vacansy(vac['name'],
-                                         vac['salary']['from'],
-                                         vac['salary']['to'],
-                                         vac['alternate_url'],
-                                         vac['salary']['currency'],
-                                         vac['area']['name'],
-                                         vac['snippet']['requirement'],
-                                         vac['snippet']['responsibility'],
-                                         vac['experience']['name']))
-            # vacancies.extend(page)
+            vacancies.extend(page)
         return vacancies
 
 
