@@ -1,7 +1,6 @@
 import json
 from abc import ABC, abstractmethod
 import requests
-from classes.vacansy_class import Vacansy
 
 
 class Engine(ABC):
@@ -37,7 +36,7 @@ class HeadHunterAPI(Engine):
                     return f"id региона {region} - {r['id']}"
         return 'Некорректный запрос'
 
-    def get_request(self, keyword, page, area, per_page=10):
+    def get_request(self, keyword, page, area, per_page=100):
         """
         Отправка запроса на API
         :param keyword: ключевое слово (название вакансии)
@@ -74,6 +73,7 @@ class HeadHunterAPI(Engine):
         for page in range(pages):
             page = self.get_request(keyword, page + 1, area)
             vacancies.extend(page)
+
         return vacancies
 
 

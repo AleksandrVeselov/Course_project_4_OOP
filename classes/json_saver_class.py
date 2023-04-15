@@ -1,6 +1,6 @@
 import json
 
-from classes.vacansy_class import Vacansy
+from classes.vacansy_class import Vacancy
 
 
 class JSONSaver:
@@ -33,14 +33,21 @@ class JSONSaver:
 
             vacancies = []
             for vacancy in data:
-                vacancies.append(Vacansy(vacancy['name'],
-                                         vacancy['salary']['from'],
-                                         vacancy['salary']['to'],
+                salary_min = vacancy['salary']['from'] if vacancy['salary']['from'] else vacancy['salary']['to']
+                salary_max = vacancy['salary']['to'] if vacancy['salary']['to'] else salary_min
+                requirement = vacancy['snippet']['requirement'] if vacancy['snippet']['requirement'] \
+                    else 'Нет требований'
+                responsibility = vacancy['snippet']['responsibility'] if vacancy['snippet']['responsibility'] \
+                    else 'Нет описания'
+
+                vacancies.append(Vacancy(vacancy['name'],
+                                         salary_min,
+                                         salary_max,
                                          vacancy['alternate_url'],
                                          vacancy['salary']['currency'],
                                          vacancy['area']['name'],
-                                         vacancy['snippet']['requirement'],
-                                         vacancy['snippet']['responsibility'],
+                                         requirement,
+                                         responsibility,
                                          vacancy['experience']['name']))
 
             self.vacancies = vacancies  # создание списка с экземплярами класса Vacancy
@@ -63,9 +70,13 @@ class JSONSaver:
             user_min = salary
             if not user_min.isdigit():
                 raise ValueError('Введите корректный фильтр по зарплате')
-            filtered_vacancies = filter(lambda x: int(user_min) <= x.salary_min, self.vacancies)
+            filtered_vacancies = filter(lambda x: int(user_min) <= x, self.vacancies)
 
         return filtered_vacancies
 
-    def delete_vacancy(self):
-        """Удаление вакансии из json-файла"""
+    def get_vacancies_without_experience(self) -> filter:
+        """Вывод вакансий без опыта или с опытом от 1 года"""
+
+        filtered_vacancies = filter(lambda x: x.experience == 'Нет опыта' or '1' in x.experience, self.vacancies)
+
+        return filtered_vacancies
