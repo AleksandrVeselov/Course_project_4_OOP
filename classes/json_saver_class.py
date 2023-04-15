@@ -18,37 +18,57 @@ class JSONSaver:
     def filename(self):
         return self.__filename
 
-    def add_vacancies(self, vacancies: list) -> None:
-        """Записывает список с вакансиями в json файл"""
+    def add_vacancies(self, hh_vacancies: list | None = None, sj_vacancies: list | None = None) -> None:
+        """Записывает список с вакансиями в json файлы (вакансии hh в один файл, sj в другой файл)"""
 
-        with open(self.__filename, 'w', encoding='UTF-8') as file:
-            json.dump(vacancies, file, indent=4, ensure_ascii=False)
+        with open(f'hh_{self.__filename}', 'w', encoding='UTF-8') as hh_file, \
+                open(f'sj_{self.__filename}', 'w', encoding='UTF-8') as sj_file:
+
+            json.dump(hh_vacancies, hh_file, indent=4, ensure_ascii=False)
+            json.dump(sj_vacancies, sj_file, indent=4, ensure_ascii=False)
 
         self.select()
 
     def select(self):
         """Функция для чтения json файла с вакансиями и создания из него списка с экземплярами класса Vacancy"""
-        with open(self.__filename, 'r', encoding='UTF-8') as file:
-            data = json.load(file)
+        with open(f'hh_{self.__filename}', 'r', encoding='UTF-8') as hh_file, \
+                open(f'sj_{self.__filename}', 'r', encoding='UTF-8') as sj_file:
+            hh_data = json.load(hh_file)
+            sj_data = json.load(sj_file)
 
             vacancies = []
-            for vacancy in data:
-                salary_min = vacancy['salary']['from'] if vacancy['salary']['from'] else vacancy['salary']['to']
-                salary_max = vacancy['salary']['to'] if vacancy['salary']['to'] else salary_min
-                requirement = vacancy['snippet']['requirement'] if vacancy['snippet']['requirement'] \
-                    else 'Нет требований'
-                responsibility = vacancy['snippet']['responsibility'] if vacancy['snippet']['responsibility'] \
-                    else 'Нет описания'
+            if hh_data:
+                for vacancy in hh_data:
+                    salary_min = vacancy['salary']['from'] if vacancy['salary']['from'] else vacancy['salary']['to']
+                    salary_max = vacancy['salary']['to'] if vacancy['salary']['to'] else salary_min
+                    requirement = vacancy['snippet']['requirement'] if vacancy['snippet']['requirement'] \
+                        else 'Нет требований'
+                    responsibility = vacancy['snippet']['responsibility'] if vacancy['snippet']['responsibility'] \
+                        else 'Нет описания'
 
-                vacancies.append(Vacancy(vacancy['name'],
-                                         salary_min,
-                                         salary_max,
-                                         vacancy['alternate_url'],
-                                         vacancy['salary']['currency'],
-                                         vacancy['area']['name'],
-                                         requirement,
-                                         responsibility,
-                                         vacancy['experience']['name']))
+                    vacancies.append(Vacancy(vacancy['name'],
+                                             salary_min,
+                                             salary_max,
+                                             vacancy['alternate_url'],
+                                             vacancy['salary']['currency'],
+                                             vacancy['area']['name'],
+                                             requirement,
+                                             responsibility,
+                                             vacancy['experience']['name']))
+
+            if sj_data:
+                for vacancy in sj_data:
+                    responsibility = vacancy['work'] if vacancy['work'] else 'Нет описания'
+                    requirement = vacancy['candidat'] if vacancy['candidat'] else 'Нет требований'
+                    vacancies.append(Vacancy(vacancy['profession'],
+                                             vacancy['payment_from'],
+                                             vacancy['payment_to'],
+                                             vacancy['link'],
+                                             vacancy['currency'],
+                                             vacancy['town']['title'],
+                                             requirement,
+                                             responsibility,
+                                             vacancy['experience']['title']))
 
             self.vacancies = vacancies  # создание списка с экземплярами класса Vacancy
 

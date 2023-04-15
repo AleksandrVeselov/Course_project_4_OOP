@@ -30,8 +30,15 @@ def filter_vacancies(filter_word: None, hh_vac: None | list[Vacancy] = None, sj_
 def get_top_vacancies(vacancies: list[Vacancy], top_n: int) -> list[Vacancy]:
     """
     Функция для возврата top_n вакансий с самой большой зарплатой
-    :param vacancies: отсортированнй по возрастанию з/п список с экземплярами класса Vacancy
+    :param vacancies: отсортированный по возрастанию з/п список с экземплярами класса Vacancy
     :param top_n: количество вакансий для вывода
     :return: список с top_n экземплярами класса Vacancy с самой большой зарплатой
     """
     return vacancies[-1:-top_n:-1]
+
+
+def get_vacancies_without_experience(vacancies: list[Vacancy]):
+    filtered_vacancies = filter(lambda x: x.experience == 'Нет опыта' or x.experience == 'без опыта'
+                                          or '1' in x.experience, vacancies)
+
+    return filtered_vacancies
