@@ -8,23 +8,23 @@ def sort_vacancies(vacancies: list[Vacancy]) -> list[Vacancy]:
     :return: отсортированный по минимальной зарплате список с экземплярами класса Vacancy
     """
     sorted_vacancies = sorted(vacancies)
+
     return sorted_vacancies
 
 
-def filter_vacancies(filter_word: None, hh_vac: None | list[Vacancy] = None, sj_vac=None) -> list[Vacancy]:
+def filter_vacancies(filter_word: str, vacancies: list[Vacancy]) -> list[Vacancy]:
     """
     Поиск вакансий по ключевому слову. Ключевое слово ищется в описании вакансии, или в требованиях к вакансии
-    :param filter_word:
-    :param hh_vac:
-    :param sj_vac:
-    :return:
+    :param filter_word: ключевое слово
+    :param vacancies: список с экземплярами класса Vacancy
+    :return: список с экземплярами класса Vacancy, в описании у которых найдено ключевое слово
     """
     filtered_vac = []
-    if hh_vac:
-        for vacancy in hh_vac:
-            if filter_word.lower() in vacancy.requirement.lower() or filter_word.lower() in vacancy.responsibility.lower():
-                filtered_vac.append(vacancy)
-        return filtered_vac
+    for vacancy in vacancies:
+        if filter_word.lower() in vacancy.requirement.lower() or filter_word.lower() in vacancy.responsibility.lower():
+            filtered_vac.append(vacancy)
+
+    return filtered_vac
 
 
 def get_top_vacancies(vacancies: list[Vacancy], top_n: int) -> list[Vacancy]:
@@ -42,3 +42,4 @@ def get_vacancies_without_experience(vacancies: list[Vacancy]):
                                           or '1' in x.experience, vacancies)
 
     return filtered_vacancies
+

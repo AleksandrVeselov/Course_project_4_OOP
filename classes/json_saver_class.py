@@ -94,9 +94,26 @@ class JSONSaver:
 
         return filtered_vacancies
 
-    def get_vacancies_without_experience(self) -> filter:
-        """Вывод вакансий без опыта или с опытом от 1 года"""
-
-        filtered_vacancies = filter(lambda x: x.experience == 'Нет опыта' or '1' in x.experience, self.vacancies)
+    def get_vacancies_by_region(self, region: str) -> list[Vacancy]:
+        """
+        Фильтрация вакансий по региону
+        :param region: регион
+        :return: список с экземплярами класса Vacancy у которых в атрибуте area есть переданный регион
+        """
+        filtered_vacancies = filter(lambda x: region.lower() in x.area.lower(), self.vacancies)
 
         return filtered_vacancies
+
+    def save_results_to_json(self, vacancies: list[Vacancy]) -> None:
+        """
+        Запись отфильтрованных и отсортированных результатов в отдельный json файл
+        :param vacancies: Список экземпляров класса Vacansy
+        :return:
+        """
+        result = [vacancy.__dict__ for vacancy in vacancies]
+        with open(f'result_{self.__filename}', 'w', encoding='UTF-8') as result_file:
+            json.dump(result, result_file, indent=4, ensure_ascii=False)
+
+
+
+

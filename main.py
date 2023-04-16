@@ -3,7 +3,7 @@ from classes.json_saver_class import JSONSaver
 from utils.utils import *
 
 
-def main():
+def user_interaction():
     print("Курсовой проект по теме объектно-ориентированное программирование: Парсинг вакансий\n"
           "======================= Нажмите Enter чтобы начать ================================")
     input()
@@ -16,48 +16,116 @@ def main():
     hh_api = None
     sj_api = None
 
+    # Если пользователь ввел hh, создается экземпляр класса HeadHunterAPI()
     if platforms.lower() == 'hh':
         hh_api = hh_sj_classes.HeadHunterAPI()
 
+    # Если пользователь ввел sj, создается экземпляр класса SuperJobAPI()
     elif platforms.lower() == 'sj':
         sj_api = hh_sj_classes.SuperJobAPI()
 
+    # Во всех остальных случаях создается два экземпляра класса: HeadHunterAPI() и SuperJobAPI()
     else:
         hh_api = hh_sj_classes.HeadHunterAPI()
         sj_api = hh_sj_classes.SuperJobAPI()
 
+    # запрос у пользователя ключевого слова для поиска по вакансиям
     keyword = input('Введите поисковый запрос -> ')
-    count = int(input('Введите количество вакансий для парсинга (кратное 100) -> '))
 
+    # Запрос у пользователя количества страниц для парсинга
+    count = int(input('Введите количество страниц для парсинга (1 страница - 100 вакансий) -> '))
+
+    # если есть экземпляр класса HeadHunterAPI() и нет экземпляра класса SuperJobAPI()
     if hh_api and not sj_api:
-        hh_vacancies = hh_api.get_vacancies(keyword, count)
-        sj_vacancies = None
-        if hh_vacancies:
-            print(f'Парсинг прошел успешно. Найдено {len(hh_vacancies)} вакансий')
+        hh_vacancies = hh_api.get_vacancies(keyword, count)  # Вакансии с сайта hh
+        sj_vacancies = None  # вакансии с сайта sj
 
+        if hh_vacancies:
+            print(f'Парсинг прошел успешно. Найдено {len(hh_vacancies)} вакансий с сайта headhunter.ru')
         else:
             print('Нет вакансий, соответствующих заданным критериям')
             exit()
 
+    # если есть экземпляр класса SuperJobAPI() и нет экземпляра класса HeadHunterAPI()
     if sj_api and not hh_api:
-        hh_vacancies = None
-        sj_vacancies = sj_api.get_vacancies(keyword, count)
+        hh_vacancies = None  # Вакансии с сайта hh
+        sj_vacancies = sj_api.get_vacancies(keyword, count)  # вакансии с сайта sj
 
+        if sj_vacancies:
+            print(f'Парсинг прошел успешно. Найдено {len(sj_vacancies)} вакансий с сайта superjob.ru')
+        else:
+            print('Нет вакансий, соответствующих заданным критериям')
+            exit()
+
+    # во всех остальных случаях должны создаться два экземпляра: HeadHunterAPI() и SuperJobAPI()
     else:
-        hh_vacancies = hh_api.get_vacancies(keyword, count)
-        sj_vacancies = sj_api.get_vacancies(keyword, count)
+        hh_vacancies = hh_api.get_vacancies(keyword, count)  # Вакансии с сайта hh
+        sj_vacancies = sj_api.get_vacancies(keyword, count)  # вакансии с сайта sj
 
-    json_saver = JSONSaver(keyword)
-    json_saver.add_vacancies(hh_vacancies, sj_vacancies)
+        if hh_vacancies:
+            print(f'Парсинг прошел успешно. Найдено {len(hh_vacancies)} вакансий с сайта headhunter.ru')
+        if sj_vacancies:
+            print(f'Парсинг прошел успешно. Найдено {len(sj_vacancies)} вакансий с сайта superjob.ru')
+        if not hh_vacancies and not sj_vacancies:
+            print('Нет вакансий, соответствующих заданным критериям')
+            exit()
 
-    filter_word = input("Введите ключевое слово для фильтрации вакансий: ")
-    top_n = int(input("Введите количество вакансий для вывода в топ N: "))
-    filtered_vacancies = filter_vacancies(filter_word, json_saver.vacancies)
-    # sorted_vacancies = sort_vacancies(filtered_vacancies)
-    # top_vacancies = get_top_vacancies(sorted_vacancies, top_n)
-    without_experience = get_vacancies_without_experience(filtered_vacancies)
-    print(*without_experience, sep='\n+++++++++++\n')
+    json_saver = JSONSaver(keyword)  # Создание экземпляра класса JSONSaver
+    json_saver.add_vacancies(hh_vacancies, sj_vacancies)  # Добавление вакансий в json файлы (отдельно hh и sj)
+
+    filter_word = input("Введите ключевое слово для фильтрации вакансий: ")  # ключевое слово для поиска
+    filtered_vacancies = filter_vacancies(filter_word, json_saver.vacancies)  # отфильтрованные вакансии
+
+    if filtered_vacancies:
+        print(f'По Вашему запросу найдено {len(filtered_vacancies)} вакансий')
+    else:
+        print('Нет вакансий, соответствующих заданным критериям')
+        exit()
+
+    # Запрос у пользователя какие операции произвести с вакансиями
+    query = input(('1 - Фильтрация вакансий по уровню минимального оклада\n'
+                   '2 - Фильтрация вакансий по региону\n'
+                   '3 - Вывод вакансий без опыта работы или с опытом от 1 года\n'))
+
+    # Фильтрация по зарплате
+    if query == '1':
+        salary = input('Введите желаемый уровень оклада в рублях, например 40000-60000, или 80000 -> ')
+        filtered_vacancies = json_saver.get_vacancies_by_salary(salary)
+
+    # Фильтрация по региону
+    elif query == '2':
+        region = input('Введите регион -> ')
+        filtered_vacancies = json_saver.get_vacancies_by_region(region)
+
+    # Фильтрация по опыту работы
+    elif query == '3':
+        filtered_vacancies = get_vacancies_without_experience(filtered_vacancies)
+
+    if not filtered_vacancies:
+        print('Нет вакансий, соответствующих заданным критериям')
+        exit()
+
+    sorted_vacancies = sort_vacancies(filtered_vacancies)  # Сортировка вакансий по минимальному окладу
+
+    # Запрос у пользователя какие операции произвести с вакансиями
+    query = input('1 - Сохранить результаты работы в json-файл\n'
+                  '2 - Вывести результаты в консоль\n'
+                  '3 - Отфильтровать вакансии по максимальной зарплате\n')
+
+    # Сохранение отфильтрованных и отсортированных вакансий в json-файл
+    if query == '1':
+        json_saver.save_results_to_json(sorted_vacancies)
+
+    # Вывод в консоль отфильтрованных и отсортированных вакансий
+    elif query == '2':
+        print(*sorted_vacancies, sep='\n++++++++++++++++++++++++++++++++++++++\n')
+
+    # Вывод пользовательского количества вакансий с максимальным окладом
+    elif query == '3':
+        top_n = int(input("Введите количество вакансий для вывода в топ N: "))
+        top_vacancies = get_top_vacancies(sorted_vacancies, top_n)
+        print(*top_vacancies, sep='\n++++++++++++++++++++++++++++++++++++++\n')
 
 
 if __name__ == '__main__':
-    main()
+    user_interaction()

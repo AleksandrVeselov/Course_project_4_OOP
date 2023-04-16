@@ -59,20 +59,19 @@ class HeadHunterAPI(Engine):
         response = requests.get(self.URL, params=params).json()
         return response['items']
 
-    def get_vacancies(self, keyword: str, count=100, area=113) -> list[json]:
+    def get_vacancies(self, keyword: str, pages, area=113) -> list[json]:
         """
         Делает запросы, изменяя номер страницы
         :param keyword: ключевое слово (название вакансии)
         :param area: ID региона из справочника (по умолчанию 113 - Вся Россия) 1716 - Владимирская область, 1 - Москва
         2019 - Московская область, 2 - Санкт-Петербург
-        :param count: количество вакансий для парсинга (минимальное значение - 100. Если задать меньше - вернется 100)
+        :param pages: количество страниц для парсинга
         :return: список с вакансиями на соответствующей странице
         """
         # Максимальное количество вакансий для парсинга - 2000
-        if count > 2000:
+        if pages >= 20:
             raise ValueError('Вы превысили максимальное число вакансий, возможных для парсинга по API')
 
-        pages = count // 100 + 1  # расчет количества страниц при условии 100 вакансий на страницу
         vacancies = []  # список с вакансиями
         for page in range(pages):
             page = self.get_request(keyword, page + 1, area)
@@ -108,10 +107,9 @@ class SuperJobAPI(Engine):
 
         return response['objects']
 
-    def get_vacancies(self, keyword, count, region_id=1):
-        pages = count // 100 + 1
+    def get_vacancies(self, keyword, pages, region_id=1):
         if pages > 5:
-            raise ValueError('Превышено максимальное количество страниц с вакансиями (не более 5)')
+            pages = 5
         vacancies = []
         for page in range(pages):
             response = self.get_request(keyword, region_id, page + 1)
