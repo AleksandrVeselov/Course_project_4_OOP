@@ -43,3 +43,7 @@ def get_vacancies_without_experience(vacancies: list[Vacancy]):
 
     return filtered_vacancies
 
+
+def print_vacancies(vacancies: list[Vacancy]) -> None:
+    """Функция для вывода в консоль списка вакансий"""
+    print(*vacancies, sep='\n++++++++++++++++++++++++++++++++++++++\n')

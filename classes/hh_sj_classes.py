@@ -20,7 +20,7 @@ class HeadHunterAPI(Engine):
         """
         Получение ID региона по его названию
         :param region: название региона
-        :param town: название название города
+        :param town: название города
         :return: id региона и id города
         """
         regions_response = requests.get('https://api.hh.ru/areas')
@@ -73,8 +73,8 @@ class HeadHunterAPI(Engine):
             raise ValueError('Вы превысили максимальное число вакансий, возможных для парсинга по API')
 
         vacancies = []  # список с вакансиями
-        for page in range(pages):
-            page = self.get_request(keyword, page + 1, area)
+        for page in range(1, pages+1):
+            page = self.get_request(keyword, page, area)
             vacancies.extend(page)
 
         return vacancies
@@ -82,11 +82,14 @@ class HeadHunterAPI(Engine):
 
 class SuperJobAPI(Engine):
     """Класс для работы с сайтом superjob"""
+
+    # токен для работы с superjob
     SUPER_SECRET_KEY = 'v3.r.137470714.2f709c74e49a5c3452e4bc542e76452080aaa3cb' \
                        '.c191c920c6f79710ba889d27e93e9bb87bdb1533 '
+    # адрес сайта
     URL = 'https://api.superjob.ru/2.0/vacancies/'
 
-    def get_request(self, keyword, page, region_id=1, count=100) -> json:
+    def get_request(self, keyword, page, region_id, count=100) -> json:
         """
         Метод для отправки запроса на api superjob
         :param keyword: ключевое слово (название профессии)
@@ -108,15 +111,17 @@ class SuperJobAPI(Engine):
         return response['objects']
 
     def get_vacancies(self, keyword, pages, region_id=1):
+        """
+        Метод для организации постраничной отправки запроса
+        :param keyword: ключевое слово
+        :param pages: количество страниц (максимальное значение для API - 5 страниц по 100 вакансий)
+        :param region_id: id региона
+        :return: список вакансий, собранных с сайта superjob по ключевому слову
+        """
         if pages > 5:
             pages = 5
         vacancies = []
         for page in range(pages):
-            response = self.get_request(keyword, region_id, page + 1)
+            response = self.get_request(keyword, page + 1, region_id)
             vacancies.extend(response)
         return vacancies
-
-
-if __name__ == '__main__':
-    sj = SuperJobAPI()
-    sj.get_vacancies('Инженер-конструктор', 'Владимир')  # 1716 - Владимирская область, 113 - Россия

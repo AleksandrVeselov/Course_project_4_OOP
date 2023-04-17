@@ -114,6 +114,21 @@ class JSONSaver:
         with open(f'result_{self.__filename}', 'w', encoding='UTF-8') as result_file:
             json.dump(result, result_file, indent=4, ensure_ascii=False)
 
+    @staticmethod
+    def delete_vacancy(vac_id: int, vacancies: list[Vacancy]):
+        """
+        Удаление из списка экземпляра класса Vacancy по его ID
+        :param vac_id: id вакансии
+        :param vacancies: список экземпляров класса Vacancy
+        :return: None
+        """
+        for vacancy in vacancies:
+            if vacancy.id == vac_id:
+                vacancies.remove(vacancy)
+                break
+        print('Не найдено вакансий по переданному id')
+
+
 
 
 

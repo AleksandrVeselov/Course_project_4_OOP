@@ -4,9 +4,8 @@ from utils.utils import *
 
 
 def user_interaction():
-    print("Курсовой проект по теме объектно-ориентированное программирование: Парсинг вакансий\n"
-          "======================= Нажмите Enter чтобы начать ================================")
-    input()
+    print("Курсовой проект по теме объектно-ориентированное программирование: Парсинг вакансий")
+    input('======================= Нажмите Enter чтобы начать ================================\n')
 
     # Запрос платформ для поиска
     platforms = input('Введите платформы для поиска вакансий HH - Headhunter, SJ - SuperJob.'
@@ -16,11 +15,11 @@ def user_interaction():
     hh_api = None
     sj_api = None
 
-    # Если пользователь ввел hh, создается экземпляр класса HeadHunterAPI()
+    # Если пользователь ввел hh или HH, создается экземпляр класса HeadHunterAPI()
     if platforms.lower() == 'hh':
         hh_api = hh_sj_classes.HeadHunterAPI()
 
-    # Если пользователь ввел sj, создается экземпляр класса SuperJobAPI()
+    # Если пользователь ввел sj или SJ, создается экземпляр класса SuperJobAPI()
     elif platforms.lower() == 'sj':
         sj_api = hh_sj_classes.SuperJobAPI()
 
@@ -72,7 +71,7 @@ def user_interaction():
 
     json_saver = JSONSaver(keyword)  # Создание экземпляра класса JSONSaver
     json_saver.add_vacancies(hh_vacancies, sj_vacancies)  # Добавление вакансий в json файлы (отдельно hh и sj)
-
+    print_vacancies(json_saver.vacancies)
     filter_word = input("Введите ключевое слово для фильтрации вакансий: ")  # ключевое слово для поиска
     filtered_vacancies = filter_vacancies(filter_word, json_saver.vacancies)  # отфильтрованные вакансии
 
@@ -85,7 +84,8 @@ def user_interaction():
     # Запрос у пользователя какие операции произвести с вакансиями
     query = input(('1 - Фильтрация вакансий по уровню минимального оклада\n'
                    '2 - Фильтрация вакансий по региону\n'
-                   '3 - Вывод вакансий без опыта работы или с опытом от 1 года\n'))
+                   '3 - Фильтрация вакансий без опыта работы или с опытом от 1 года\n'
+                   '4 - Отфильтровать вакансии по максимальной зарплате\n'))
 
     # Фильтрация по зарплате
     if query == '1':
@@ -107,24 +107,26 @@ def user_interaction():
 
     sorted_vacancies = sort_vacancies(filtered_vacancies)  # Сортировка вакансий по минимальному окладу
 
-    # Запрос у пользователя какие операции произвести с вакансиями
-    query = input('1 - Сохранить результаты работы в json-файл\n'
-                  '2 - Вывести результаты в консоль\n'
-                  '3 - Отфильтровать вакансии по максимальной зарплате\n')
-
-    # Сохранение отфильтрованных и отсортированных вакансий в json-файл
-    if query == '1':
-        json_saver.save_results_to_json(sorted_vacancies)
-
-    # Вывод в консоль отфильтрованных и отсортированных вакансий
-    elif query == '2':
-        print(*sorted_vacancies, sep='\n++++++++++++++++++++++++++++++++++++++\n')
-
-    # Вывод пользовательского количества вакансий с максимальным окладом
-    elif query == '3':
+    query = input('Хотите отфильтровать топ N вакансий с максимальным уровнем оклада?(Да/Нет)')
+    if query.lower() == 'да':
         top_n = int(input("Введите количество вакансий для вывода в топ N: "))
-        top_vacancies = get_top_vacancies(sorted_vacancies, top_n)
-        print(*top_vacancies, sep='\n++++++++++++++++++++++++++++++++++++++\n')
+        sorted_vacancies = get_top_vacancies(sorted_vacancies, top_n)
+
+    while True:
+        print_vacancies(sorted_vacancies)  # вывод в консоль результатов
+        # Запрос у пользователя какие операции произвести с вакансиями
+        query = input('1 - Сохранить результаты работы в json-файл\n'
+                      '2 - Удалить из списка вакансию по ее ID\n')
+
+        # Сохранение отфильтрованных и отсортированных вакансий в json-файл
+        if query == '1':
+            json_saver.save_results_to_json(sorted_vacancies)
+            break
+
+        # Удаление вакансии из списка
+        elif query == '2':
+            del_id = input('Введите ID вакансии для ее удаления из списка')
+            json_saver.delete_vacancie(del_id)
 
 
 if __name__ == '__main__':
