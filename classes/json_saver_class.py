@@ -22,7 +22,6 @@ class JSONSaver:
 
         with open(f'hh_{self.__filename}', 'w', encoding='UTF-8') as hh_file, \
                 open(f'sj_{self.__filename}', 'w', encoding='UTF-8') as sj_file:
-
             json.dump(hh_vacancies, hh_file, indent=4, ensure_ascii=False)
             json.dump(sj_vacancies, sj_file, indent=4, ensure_ascii=False)
 
@@ -68,6 +67,7 @@ class JSONSaver:
                                              vacancy['experience']['title']))
 
             return vacancies
+
     @staticmethod
     def get_vacancies_by_salary(salary: str, vacancies: list[Vacancy]) -> list[Vacancy]:
         """
@@ -91,6 +91,7 @@ class JSONSaver:
             filtered_vacancies = filter(lambda x: int(user_min) <= x, vacancies)
 
         return list(filtered_vacancies)
+
     @staticmethod
     def get_vacancies_by_region(region: str, vacancies: list[Vacancy]) -> list[Vacancy]:
         """
@@ -126,5 +127,3 @@ class JSONSaver:
                 vacancies.remove(vacancy)
                 break
         print('Не найдено вакансий по переданному id')
-
-

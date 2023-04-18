@@ -92,12 +92,12 @@ def parse(api_hh: None | HeadHunterAPI, api_sj: None | SuperJobAPI, keyword: str
         hh_vacancies = None  # Вакансии с сайта hh
         sj_vacancies = api_sj.get_vacancies(keyword, count)
 
-    # если есть экземпляр класса SuperJobAPI() и нет экземпляра класса HeadHunterAPI()
+        # если есть экземпляр класса SuperJobAPI() и нет экземпляра класса HeadHunterAPI()
     elif api_sj is None:
         sj_vacancies = None  # вакансии с сайта sj
         hh_vacancies = api_hh.get_vacancies(keyword, count)  # Вакансии с сайта hh
 
-    # во всех остальных случаях должны создаться два экземпляра: HeadHunterAPI() и SuperJobAPI()
+        # во всех остальных случаях должны создаться два экземпляра: HeadHunterAPI() и SuperJobAPI()
     else:
         hh_vacancies = api_hh.get_vacancies(keyword, count)  # Вакансии с сайта hh
         sj_vacancies = api_sj.get_vacancies(keyword, count)  # вакансии с сайта sj
