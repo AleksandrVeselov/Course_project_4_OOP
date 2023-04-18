@@ -30,15 +30,22 @@ def user_interaction():
     json_saver = JSONSaver(keyword)  # Создание экземпляра класса JSONSaver
     json_saver.add_vacancies(hh_vacancies, sj_vacancies)  # Добавление вакансий в json файлы (отдельно hh и sj)
     vacancies_classes = json_saver.select()  # Создание списка с экземплярами класса Vacancy
-    filter_word = input("Введите ключевое слово для фильтрации вакансий: ")  # ключевое слово для поиска
-    filtered_vacancies = filter_vacancies(filter_word, vacancies_classes)  # отфильтрованные вакансии
 
-    if filtered_vacancies:
-        print(f'По Вашему запросу найдено {len(filtered_vacancies)} вакансий')
-        print()
+    filter_word = input("Введите ключевое слово для поиска в описании вакансий"
+                        "Для пропуска данной сортировки нажмите Enter -> ")  # ключевое слово для поиска
+
+    if filter_word:
+        filtered_vacancies = filter_vacancies(filter_word, vacancies_classes)  # отфильтрованные вакансии
+
+        if filtered_vacancies:
+            print(f'По Вашему запросу найдено {len(filtered_vacancies)} вакансий')
+            print()
+        else:
+            print('Нет вакансий, соответствующих заданным критериям')
+            exit()
+
     else:
-        print('Нет вакансий, соответствующих заданным критериям')
-        exit()
+        filtered_vacancies = vacancies_classes
 
     while True:
         # Запрос у пользователя какие операции произвести с вакансиями
