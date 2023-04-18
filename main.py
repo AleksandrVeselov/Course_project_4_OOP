@@ -32,7 +32,7 @@ def user_interaction():
     vacancies_classes = json_saver.select()  # Создание списка с экземплярами класса Vacancy
 
     filter_word = input("Введите ключевое слово для поиска в описании вакансий"
-                        "Для пропуска данной сортировки нажмите Enter -> ")  # ключевое слово для поиска
+                        "Для пропуска данного фильтра нажмите Enter -> ")  # ключевое слово для поиска
 
     if filter_word:
         filtered_vacancies = filter_vacancies(filter_word, vacancies_classes)  # отфильтрованные вакансии
