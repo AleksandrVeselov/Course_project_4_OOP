@@ -69,11 +69,11 @@ class HeadHunterAPI(Engine):
         :return: список с вакансиями на соответствующей странице
         """
         # Максимальное количество вакансий для парсинга - 2000
-        if pages >= 20:
+        if pages > 20:
             raise ValueError('Вы превысили максимальное число вакансий, возможных для парсинга по API')
 
         vacancies = []  # список с вакансиями
-        for page in range(1, pages+1):
+        for page in range(pages):
             page = self.get_request(keyword, page, area)
             vacancies.extend(page)
 
