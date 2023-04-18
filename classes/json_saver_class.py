@@ -12,7 +12,6 @@ class JSONSaver:
         :param keyword: имя для файла
         """
         self.__filename = f'{keyword.title()}.json'  # имя файла
-        self.vacancies = None  # список экземпляров класса Vacancy
 
     @property
     def filename(self):
@@ -27,9 +26,7 @@ class JSONSaver:
             json.dump(hh_vacancies, hh_file, indent=4, ensure_ascii=False)
             json.dump(sj_vacancies, sj_file, indent=4, ensure_ascii=False)
 
-        self.select()
-
-    def select(self):
+    def select(self) -> list[Vacancy]:
         """Функция для чтения json файла с вакансиями и создания из него списка с экземплярами класса Vacancy"""
         with open(f'hh_{self.__filename}', 'r', encoding='UTF-8') as hh_file, \
                 open(f'sj_{self.__filename}', 'r', encoding='UTF-8') as sj_file:
@@ -70,11 +67,12 @@ class JSONSaver:
                                              responsibility,
                                              vacancy['experience']['title']))
 
-            self.vacancies = vacancies  # создание списка с экземплярами класса Vacancy
-
-    def get_vacancies_by_salary(self, salary: str) -> filter:
+            return vacancies
+    @staticmethod
+    def get_vacancies_by_salary(salary: str, vacancies: list[Vacancy]) -> list[Vacancy]:
         """
         Фильтрация вакансий по зарплате
+        :param vacancies: список с экземплярами класса Vacancy
         :param salary: параметры фильтрации в следующем формате: минимальная з/п-максимальная з/п. Можно указать одно
         значение з/п, оно будет считаться минимальным, в фильтр попадут все вакансии с з/п больше либо равной переданной
         :return: отфильтрованный список вакансий
@@ -84,25 +82,26 @@ class JSONSaver:
             user_min, user_max = user_filter[0], user_filter[1]
             if not user_min.isdigit() and not user_max.isdigit():
                 raise ValueError('Введите корректный фильтр по зарплате')
-            filtered_vacancies = filter(lambda x: int(user_min) <= x.salary_min <= int(user_max), self.vacancies)
+            filtered_vacancies = filter(lambda x: int(user_min) <= x.salary_min <= int(user_max), vacancies)
 
         else:
             user_min = salary
             if not user_min.isdigit():
                 raise ValueError('Введите корректный фильтр по зарплате')
-            filtered_vacancies = filter(lambda x: int(user_min) <= x, self.vacancies)
+            filtered_vacancies = filter(lambda x: int(user_min) <= x, vacancies)
 
-        return filtered_vacancies
-
-    def get_vacancies_by_region(self, region: str) -> list[Vacancy]:
+        return list(filtered_vacancies)
+    @staticmethod
+    def get_vacancies_by_region(region: str, vacancies: list[Vacancy]) -> list[Vacancy]:
         """
         Фильтрация вакансий по региону
+        :param vacancies: список с экземплярами класса Vacancy
         :param region: регион
         :return: список с экземплярами класса Vacancy у которых в атрибуте area есть переданный регион
         """
-        filtered_vacancies = filter(lambda x: region.lower() in x.area.lower(), self.vacancies)
+        filtered_vacancies = filter(lambda x: region.lower() in x.area.lower(), vacancies)
 
-        return filtered_vacancies
+        return list(filtered_vacancies)
 
     def save_results_to_json(self, vacancies: list[Vacancy]) -> None:
         """
@@ -127,8 +126,5 @@ class JSONSaver:
                 vacancies.remove(vacancy)
                 break
         print('Не найдено вакансий по переданному id')
-
-
-
 
 
